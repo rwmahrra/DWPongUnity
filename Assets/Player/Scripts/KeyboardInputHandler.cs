@@ -5,7 +5,7 @@ using UnityEngine;
 public class KeyboardInputHandler : MonoBehaviour
 {
 
-    public bool driveFromMQTT = false;
+    public bool driveFromMQTT = true;
 
     public float speed = 0.6f; // reflect value in original of 6px velocity per tick 
     public float maxOffset = 8.1f; // (game width / 2 - paddle width / 2)
@@ -16,6 +16,8 @@ public class KeyboardInputHandler : MonoBehaviour
 
     private Transform myTransform;
     private float MQTTInput;
+    private int frame;
+    private bool newFrame;
 
     public MQTTReceiver _eventSender;
 
@@ -23,6 +25,7 @@ public class KeyboardInputHandler : MonoBehaviour
     void Start()
     {
 
+        newFrame = false;
         // putting this here for now
         Application.targetFrameRate = 60;
         myTransform = gameObject.transform;
@@ -42,8 +45,10 @@ public class KeyboardInputHandler : MonoBehaviour
 
     private void OnMessageArrivedHandler(string newMsg)
     {
-        //Debug.Log("Event Fired. The message is = " + newMsg);
+        Debug.Log("Event Fired. The message is = " + newMsg);
         MQTTInput = float.Parse(newMsg);
+        Debug.Log("Event Fired. The MQTTInput message is = " + MQTTInput);
+        newFrame = true;
     }
 
     // Update is called once per frame
@@ -87,18 +92,33 @@ public class KeyboardInputHandler : MonoBehaviour
             newPosition.x = Mathf.Clamp(newPosition.x, -maxOffset, maxOffset);
             myTransform.position = newPosition;
 
-            if (_eventSender.isConnected)
-            {
-                //Debug.Log("Sending paddle position");
-                _eventSender.Publish("paddle/position", myTransform.position.x.ToString()); // sending current position
-            }
+            // if (_eventSender.isConnected)
+            // {
+            //     Debug.Log("Sending paddle position");
+            //     _eventSender.Publish("paddle/position", myTransform.position.x.ToString()); // sending current position
+            // }
         }
     }
 
     private void HandleMQTTInput()
-    {
+    {   
+        
+        float newSpeed = 0.0f;
+        if (newFrame)
+        {
+            Dictionary<float, float> action = new Dictionary<float, float>(){ {0f,-1f}, {1f,1f}, {2f,0f} };
+            MQTTInput = action[MQTTInput];
+
+            newFrame = false;
+            
+        } 
+
+        newSpeed +=  MQTTInput*speed;
+
         Vector3 newPosition = myTransform.position;
-        newPosition.x = MQTTInput;
+        newPosition.x += newSpeed;
+        newPosition.x = Mathf.Clamp(newPosition.x, -maxOffset, maxOffset);
+
         myTransform.position = newPosition;
 
     }
