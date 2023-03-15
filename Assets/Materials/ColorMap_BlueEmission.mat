@@ -90,6 +90,7 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _Blend: 0
+    - _BlinkSpeed: 10
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -98,7 +99,7 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _EmissionMultiplier: 10
+    - _EmissionMultiplier: 15
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
